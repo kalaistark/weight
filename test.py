@@ -43,6 +43,7 @@ class Window(QtWidgets.QWidget):
         self.show()
 
     def get_weight(self):
+        csv = open("weightdata.csv","a")
         ser.flushOutput()
         bytesToRead = ser.inWaiting()
         v= str(ser.read(bytesToRead))
@@ -50,9 +51,14 @@ class Window(QtWidgets.QWidget):
         a = x[-3]
         if len(a) == 0:
             print(x[-2])
+            x = (x[-2])[11:]
+            csv.write(x + "kg" + " time:" + str(time.datetime.now())+ "\n")
+            self.l.setText(x)
         else:
             #print(x[-3:])
             print((x[-3])[11:])
+            y = (x[-3])[11:]
+            csv.write(y +" kg" + " time:" + str(time.datetime.now())+ "\n")
             self.l.setText(x[-3][11:]+" kg")
 
 app = QtWidgets.QApplication(sys.argv)
