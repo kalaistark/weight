@@ -1,19 +1,45 @@
 import sys, subprocess, serial, csv
-import os
+import os,glob
 import datetime as time
 from PyQt5 import QtWidgets
 
-port = "/dev/ttyUSB0"
 
+result = []
 # subprocess.run("chmod 666 /dev/ttyUSB0")
-returned = os.popen("sudo chmod 666 /dev/ttyUSB0").readline()
-print(returned)
+def serial_ports():
+   if sys.platform.startswith('win'):
+       ports = ['COM%s' % (i + 1) for i in range(256)]
+   elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+       # this excludes your current terminal "/dev/tty"
+       ports = glob.glob('/dev/tty[A-Za-z]*')
+   elif sys.platform.startswith('darwin'):
+       ports = glob.glob('/dev/tty.*')
+   else:
+       raise EnvironmentError('Unsupported platform')
 
-ser = serial.Serial("/dev/ttyUSB0", 2400, timeout=2)
+   for port in ports:
+       try:
+           s = serial.Serial(port)
+           s.close()
+           result.append(port)
+       except (OSError, serial.SerialException):
+           pass
+   return result
+
+
+
+def admin():
+    serial_ports()
+    returned = os.popen("sudo chmod 666 "+result[0]).readline()
+    print(returned)
+
+admin()
+ser = serial.Serial(result[0], 2400, timeout=2)
 
 
 #dmesg | grep tty -- to list serial ports in linux
 # sudo chmod 666 /dev/ttyUSB0)
+
 
 class Window(QtWidgets.QWidget):
 
